@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-import constants.memory
+
 # Imports
 from core.codex import Codex
-from core.communicator import Communicator
-from modules.player import Player
 
 # Define constants
 PROCESS_NAME = "Monster&Me"
@@ -29,37 +27,20 @@ def main():
     # Initialize Application
     initialize()
 
+    # Debug
     print("Process ID:", codex.grappler.getProcessID())
     print("Process Base Memory Address:", codex.grappler.getBaseAddress())
 
-    codex.player.update()
-    print(codex.player.experience)
+    # Keep updating
+    while True:
+        codex.player.update()
 
-    # while True:
-    #     codex.player.update()
-#
-    #     print(codex.player.experience)
-#
-    #     import time, os
-    #     time.sleep(1)
-#
-    #     os.system('cls')
+        print(codex.player.dump(format=False))
 
+        import time, os
+        time.sleep(1)
 
-
-    #print(codex.player.dump(format=False))
-
-    #codex.game.beginBattle()
-
-    # codex.memory.write(constants.memory.MEMORY_USER_POSITION_RELATIVE_X, 93, 4)
-    # codex.memory.write(constants.memory.MEMORY_USER_POSITION_RELATIVE_Y, 49, 4)
-    #codex.memory.write(constants.memory.MEMORY_USER_POSITION_RELATIVE_X, 82, 4)
-    #codex.memory.write(constants.memory.MEMORY_USER_POSITION_RELATIVE_Y, 24, 4)
-#
-    # import time
-    # time.sleep(1)
-
-    # codex.game.closeWuxingOven()
+        os.system('cls')
 
 
 if __name__ == "__main__":

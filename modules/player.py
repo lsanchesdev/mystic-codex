@@ -19,7 +19,7 @@ class Player:
         self.inventory = None
         self.rank = None
 
-    def dump(self, format=True, stop_execution=True):
+    def dump(self, format=True, stop_execution=False):
         if format:
             for attr, value in self.__dict__.items():
                 print(f"{attr} ({type(value).__name__}):")
@@ -147,10 +147,6 @@ class Player:
         self.setInventoryEquipped()
 
     def setInventoryEquipped(self):
-        list_item = 0x6BD0D4
-        data = self.codex.memory.read(0x6BD0D4, is_pointer=True)
-
-        print(data)
         for i in range(0, len(MemoryBook.MEMORY_USER_INVENTORY_EQUIPPED)):
             try:
                 list_item = self.codex.memory.read(MemoryBook.MEMORY_USER_INVENTORY_EQUIPPED[i], is_pointer=True)
