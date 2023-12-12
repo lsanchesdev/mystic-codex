@@ -19,8 +19,7 @@ def initialize():
 
 
 def update():
-    # player.update()
-    pass
+    codex.player.update()
 
 
 def main():
@@ -33,13 +32,17 @@ def main():
 
     # Keep updating
     while True:
-        codex.player.update()
+        # Update necessary information
+        update()
 
+        # Dump player information on console
         print(codex.player.dump(format=False))
 
+        # Wait 1 second
         import time, os
         time.sleep(1)
 
+        # Clear console
         os.system('cls')
 
 
