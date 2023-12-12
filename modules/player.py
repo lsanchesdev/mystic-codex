@@ -147,10 +147,13 @@ class Player:
         self.setInventoryEquipped()
 
     def setInventoryEquipped(self):
+        # Go through all equipped items
         for i in range(0, len(MemoryBook.MEMORY_USER_INVENTORY_EQUIPPED)):
             try:
+                # Get the memory address for equipped item
                 list_item = self.codex.memory.read(MemoryBook.MEMORY_USER_INVENTORY_EQUIPPED[i], is_pointer=True)
 
+                # Extract item information
                 item = {
                     "id": self.codex.memory.read(list_item + 32, 4),
                     "type": self.codex.memory.read(list_item + 42, 2),
@@ -171,18 +174,23 @@ class Player:
                     }
                 }
 
+                # Handle item type 600
                 if item["type"] == 600:
                     item["stats"]["life"] = -item["stats"]["life"]
 
+                # Push item to list of equipped items
                 self.inventory['equipped'].append(item)
-            except Exception as e:
+            except Exception as e:  # If there's no item equipped on that slot, move on.
                 continue
 
     def setInventoryBag(self):
+        # Go through all items in the inventory bag
         for i in range(0, self.inventory['count']):
+            # Get memory address for item
             list_item = self.codex.memory.readList(i, MemoryBook.MEMORY_USER_INVENTORY_BAG,
                                                    MemoryBook.MEMORY_USER_INVENTORY_BAG_FIRST_ITEM)
 
+            # Extract item information
             item = {
                 "id": self.codex.memory.read(list_item + 32, 4),
                 "type": self.codex.memory.read(list_item + 42, 2),
@@ -203,9 +211,11 @@ class Player:
                 }
             }
 
+            # Handle item type 600
             if item["type"] == 600:
                 item["stats"]["life"] = -item["stats"]["life"]
 
+            # Push item to list of items in the bag
             self.inventory['bag'].append(item)
 
     def setRank(self):
