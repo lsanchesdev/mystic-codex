@@ -1,17 +1,12 @@
-<center style="text-align: center;">
-  <h1 align="center">
-  <a href="https://kofrino.com/" target="_blank">
-    Mystic Codex
-  </a>
-  </h1>
+<h1>
+    <a href="https://kofrino.com/" target="_blank">Mystic Codex</a>
     <h5>The Lost Book of the Orient</h5>
+</h1>
 
-  <p align="center">
+<p>
     <img src="https://img.shields.io/badge/Project-Mystic&nbsp;Codex-yellowgreen">
     <img src="https://img.shields.io/badge/Version-0.0.1a-yellowgreen">
-  </p>
-
-</center>
+</p>
 
 ## Tech Stack
 
