@@ -1,11 +1,21 @@
 import constants.window as WindowBook
 import constants.game_actions as GameActions
+from enum import Enum
+
+
+class State(Enum):
+    NORMAL = 1010
+    BATTLE = 1009
+    CHANGING_MAPS = 1008
+    DIALOG = 1011
+
 
 class Game:
 
     def __init__(self, codex):
         super().__init__()
         self.codex = codex
+        self.state = State.NORMAL
 
     def openInventory(self):
         self.codex.communicator.sendCommandToWindow(self.codex.player.name + WindowBook.WINDOW_TITLE_INVENTORY,
@@ -30,3 +40,9 @@ class Game:
 
     def beginBattle(self):
         self.codex.communicator.sendCommand(GameActions.GAME_ACTION_BEGIN_BATTLE)
+
+    def getState(self, returnValue=False):
+        if returnValue:
+            return self.state.value
+        else:
+            return self.state

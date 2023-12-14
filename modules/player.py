@@ -18,6 +18,7 @@ class Player:
         self.position = None
         self.inventory = None
         self.rank = None
+        self.pets = None
 
     def dump(self, format=True, stop_execution=False):
         if format:
@@ -97,10 +98,118 @@ class Player:
             'text': None,
             'type': None,
         }
+        self.pets = {
+            'count': self.codex.memory.read(MemoryBook.MEMORY_PETS_COUNT, 2),
+            'marching': None,
+            'list': [],
+        }
         self.setRank()
         self.setInventory()
         self.calculateHumanAttributes()
         self.calculateExperience()
+        self.setPets()
+
+    def setPets(self):
+        # Go through all pets
+        for i in range(0, self.pets['count']):
+            # Get memory address for pet
+            list_pet = self.codex.memory.readList(i, MemoryBook.MEMORY_PETS,
+                                                   MemoryBook.MEMORY_PETS_FIRST_PET)
+
+            # Get memory address for equipped item
+            equipped_item = self.codex.memory.read(list_pet + 0xB4, 4, True)
+
+            # Extract pet information
+            pet = {
+                "id": self.codex.memory.read(list_pet + 0x90, 4),
+                "name": self.codex.memory.read(list_pet + 4, 16),
+                "level": self.codex.memory.read(list_pet + 0x38, 2),
+                "loyal": self.codex.memory.read(list_pet + 0x94, 2),
+                "is_marching": bool(self.codex.memory.read(list_pet + 0xB0, 2)),
+                "experience": {
+                    "current": self.codex.memory.read(list_pet + 0x3C, 4),
+                    "max": 0
+                },
+                "stats": {
+                    "life": {
+                        "current": self.codex.memory.read(list_pet + 0x40, 4),
+                        "max": self.codex.memory.read(list_pet + 0x44, 4),
+                    },
+                    "attack": self.codex.memory.read(list_pet + 0x1C, 4),
+                    "defense": self.codex.memory.read(list_pet + 0x20, 4),
+                    "dexterity": self.codex.memory.read(list_pet + 0x24, 4),
+                    "without-item": {
+                        "life": self.codex.memory.read(list_pet + 0x44, 4),
+                        "attack": self.codex.memory.read(list_pet + 0x1C, 4),
+                        "defense": self.codex.memory.read(list_pet + 0x20, 4),
+                        "dexterity": self.codex.memory.read(list_pet + 0x24, 4),
+                    }
+                },
+                "item": None,
+                "medals": {
+                    "attack": self.codex.memory.read(list_pet + 0x84, 4),
+                    "defense": self.codex.memory.read(list_pet + 0x88, 4),
+                    "dexterity": self.codex.memory.read(list_pet + 0x8C, 4),
+                },
+                "growth": {
+                    "life": 0,
+                    "3A": {
+                        "attack": 0,
+                        "defense": 0,
+                        "dexterity": 0,
+                        "total": 0,
+                    }
+                }
+            }
+
+            # Calculate Max Experience (Next Level Requirement)
+            (pet['experience']['max'],) = int((pet["level"] + 1) * pet["level"] * 0.75),
+
+            # Get equipped item attributes
+            if equipped_item:
+                pet['item'] = {
+                    "id": self.codex.memory.read(equipped_item + 32, 4),
+                    "type": self.codex.memory.read(equipped_item + 42, 2),
+                    "name": self.codex.memory.read(equipped_item, 16),
+                    "level": self.codex.memory.read(equipped_item + 44, 4),
+                    "price": self.codex.memory.read(equipped_item + 36, 4),
+                    "maker": self.codex.memory.read(equipped_item + 16, 16),
+                    "stats": {
+                        "life": self.codex.memory.read(equipped_item + 48, 2),
+                        "mana": self.codex.memory.read(equipped_item + 50, 2),
+                        "attack": self.codex.memory.read(equipped_item + 52, 2),
+                        "defense": self.codex.memory.read(equipped_item + 54, 2),
+                        "dexterity": self.codex.memory.read(equipped_item + 56, 2),
+                        "anti-poison": self.codex.memory.read(equipped_item + 58, 2),
+                        "CR": self.codex.memory.read(equipped_item + 60, 2),
+                        "anti-hypnotism": self.codex.memory.read(equipped_item + 62, 2),
+                        "SR": self.codex.memory.read(equipped_item + 64, 2),
+                    }
+                }
+
+                # For each possible attribute bonus, remove it from the total
+                for attr in pet['item']['stats']:
+                    if pet['item']['stats'][attr]:
+                        pet['stats']['without-item'][attr] -= pet['item']['stats'][attr]
+
+            # Calculate Growth (Life)
+            pet['growth']['life'] = round(float(pet['stats']['without-item']['life']) / (pet['level'] - 1), 2)
+
+            # Sum attributes to calculate growth
+            attributes = float(pet['stats']['without-item']['attack'] + pet['stats']['without-item']['defense'] + pet['stats']['without-item']['dexterity'])
+
+            # Calculate Growth (3-A:Attack)
+            pet['growth']['3A']['attack'] = round(((pet['stats']['without-item']['attack'] / (attributes * 100)) * 100) * 100, 2)
+            pet['growth']['3A']['defense'] = round(((pet['stats']['without-item']['defense'] / (attributes * 100)) * 100) * 100, 2)
+            pet['growth']['3A']['dexterity'] = round(((pet['stats']['without-item']['dexterity'] / (attributes * 100)) * 100) * 100, 2)
+            pet['growth']['3A']['total'] = round(attributes / (pet['level'] - 1), 2)
+
+            # Push pet to list of pets
+            self.pets['list'].append(pet)
+
+            # In case of marching pet, set it
+            if pet['is_marching']:
+                self.pets['marching'] = pet
 
     def calculateExperience(self):
         self.experience['max'] = self.stats['level'] * (self.stats['level'] + 1)
