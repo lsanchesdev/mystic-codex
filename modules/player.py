@@ -1,6 +1,7 @@
 # Imports
 import constants.memory as MemoryBook
 import pprint
+import sys
 
 
 class Player:
@@ -31,7 +32,7 @@ class Player:
                 print(f"{attr} = {value}")
 
         if stop_execution:
-            exit()
+            sys.exit()
 
     def update(self):
         (self.name,) = self.codex.memory.read(MemoryBook.MEMORY_USER_NAME, 16),

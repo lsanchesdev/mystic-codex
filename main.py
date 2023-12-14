@@ -36,7 +36,7 @@ def main():
         update()
 
         # Dump player information on console
-        print(codex.player.dump(format=False))
+        codex.player.dump(format=False)
 
         # Wait 1 second
         import time, os
