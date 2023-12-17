@@ -1,5 +1,6 @@
 from core.singleton import singleton
 from core.grappler import Grappler
+from core.grappler import GrapplerType
 from core.memory import Memory
 from core.communicator import Communicator
 from modules.game import Game
@@ -8,16 +9,18 @@ from modules.player import Player
 
 @singleton
 class Codex:
-    def __init__(self, process_name):
+    def __init__(self, parameters, mode=GrapplerType.PROCESS):
         super().__init__()
+
+        # Store parameters
+        self.parameters = parameters
+        self.mode = mode
+
         # Initialize Grappler
         self.grappler = Grappler(self)
 
-        # Attach Grappler to running Process
-        self.grappler.attachTo(process_name)
-
         # Initialize Modules
-        self.memory = Memory(self)
-        self.communicator = Communicator(self)
-        self.player = Player(self)
-        self.game = Game(self)
+        self.memory = None
+        self.communicator = None
+        self.player = None
+        self.game = None

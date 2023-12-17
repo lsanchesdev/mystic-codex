@@ -13,17 +13,19 @@ WriteProcessMemory = ctypes.windll.kernel32.WriteProcessMemory
 class Memory:
     def __init__(self, codex):
         self.codex = codex
-        self.process_id = codex.grappler.getProcessID()
-        self.process_base_memory_address = codex.grappler.getBaseAddress()
+        self.process = {
+            'id': codex.grappler.getProcessID(),
+            'base_memory': codex.grappler.getBaseAddress()
+        }
 
     def readFromBase(self, address, size, is_pointer=False):
-        return self.read((self.process_base_memory_address + address), size, is_pointer)
+        return self.read((self.process['base_memory'] + address), size, is_pointer)
 
     def read(self, address, size=4, is_pointer=False):
         if not is_pointer:
             buffer = ctypes.create_string_buffer(size)
             bytesRead = ctypes.c_size_t()
-            processHandle = OpenProcess(MemoryBook.MEMORY_SYSTEM_PROCESS_ALL_ACCESS, False, self.process_id)
+            processHandle = OpenProcess(MemoryBook.MEMORY_SYSTEM_PROCESS_ALL_ACCESS, False, self.process['id'])
 
             if not processHandle:
                 raise Exception("Could not open process")
@@ -52,7 +54,7 @@ class Memory:
             return self.read(address, size)
 
     def write(self, address, data, size):
-        processHandle = OpenProcess(MemoryBook.MEMORY_SYSTEM_PROCESS_ALL_ACCESS, False, self.process_id)
+        processHandle = OpenProcess(MemoryBook.MEMORY_SYSTEM_PROCESS_ALL_ACCESS, False, self.process['id'])
         if not processHandle:
             raise Exception("Could not open process")
 
